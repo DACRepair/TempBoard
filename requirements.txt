@@ -1,5 +1,3 @@
 pyserial
 bitstring
-
-sqlalchemy
 influxdb
