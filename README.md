@@ -1,7 +1,7 @@
 # TempBoard
 'TempBoard' is a program that polls a serial port for a custom OneWire multiplexer into an InfluxDB TSDB for metrics and reporting.
 
-###Setup:
+### Setup:
 > This has been developed and tested on Python 3.6.x
 > It should work fine on other versions, however this is the supported version.
 
@@ -43,7 +43,7 @@ host = temp-monitor
 Once this has been configured, then execution is as simple as running `app.py`.
 
 ### Service
-####Linux:
+#### Linux:
 
 I have included an example SystemD config in the extra folder that can be copied into `/etc/systemd/system/tempboard.service`.
 This is designed to work the the Raspberry Pi, however this should work on most linux distros.
