@@ -1,0 +1,27 @@
+[app]
+testing = True
+debug = True
+
+[serial]
+port = COM1
+baud = 115200
+
+[influxdb]
+host = 127.0.0.1
+port = 8086
+ssl = True
+verify = False
+username = admin
+password = admin
+database = test
+timeout = 300
+retries = 3
+use_udp = False
+
+[influxtags]
+region = homelab
+host = temp-monitor
+
+[sensors]
+1234 = Intake
+
