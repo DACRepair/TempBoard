@@ -1,30 +1,31 @@
 import os
-from configparser import ConfigParser as _CP
+from configparser import ConfigParser
 
 
-class ConfigParser(_CP):
-    def __init__(self):
-        self.conf_file = None
-        super().__init__()
+class Config:
+    def __init__(self, config_file: str = None):
+        if config_file is None:
+            config_file = os.getcwd() + "/config.ini"
+        config_file = os.path.normpath(config_file)
+        self._config = ConfigParser()
+        if os.path.isfile(config_file):
+            self._config.read(config_file)
 
-    def read(self, filenames, encoding=None):
-        super().read(filenames, encoding)
-        self.conf_file = filenames
+    @staticmethod
+    def _gen_env(section: str, option: str):
+        return section.upper() + "__" + option.upper()
 
-    def _write_file(self):
-        with open(self.conf_file, 'w') as file:
-            self.write(file)
-            file.close()
-        self.read(self.conf_file)
-
-    def add_section(self, section):
-        super().add_section(section)
-        self._write_file()
-
-    def set(self, section, option, value=None):
-        super().set(section, option, value)
-        self._write_file()
-
-
-Config = ConfigParser()
-Config.read(os.path.normpath(os.getcwd() + "/config.ini"))
+    def get(self, section: str, option: str, default=None, wrap=None):
+        value = os.getenv(self._gen_env(section, option), self._config.get(section, option, fallback=default))
+        if callable(wrap):
+            if isinstance(wrap(), bool):
+                value = str(value)
+                if value.lower() == 'true' or str(value) == "1" or str(value).lower() == 'y':
+                    value = True
+                elif value.lower() == 'false' or str(value) == "0" or str(value).lower() == 'n':
+                    value = False
+                else:
+                    value = default
+            else:
+                value = wrap(value)
+        return value

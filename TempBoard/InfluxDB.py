@@ -1,34 +1,34 @@
 import datetime
+
 from influxdb import InfluxDBClient
-from .Config import Config
 
 
-class Influx:
-    def __init__(self, host: str = None, port: int = None, ssl: bool = False, verify_ssl: bool = False,
-                 username: str = None, password: str = None, database: str = None, timeout: int = None,
-                 retries: int = None, use_udp: bool = False):
-        self._influx = InfluxDBClient(
-            host=Config.get('influxdb', 'host') if Config.has_option('influxdb', 'host') else host or None,
-            port=Config.getint('influxdb', 'port') if Config.has_option('influxdb', 'port') else port or None,
-            ssl=Config.getboolean('influxdb', 'ssl') if Config.has_option('influxdb', 'ssl') else ssl or None,
-            verify_ssl=Config.getboolean('influxdb', 'verify') if Config.has_option('influxdb',
-                                                                                    'verify') else verify_ssl or None,
-            username=Config.get('influxdb', 'username') if Config.has_option('influxdb',
-                                                                             'username') else username or None,
-            password=Config.get('influxdb', 'password') if Config.has_option('influxdb',
-                                                                             'password') else password or None,
-            database=Config.get('influxdb', 'database') if Config.has_option('influxdb',
-                                                                             'database') else database or None,
-            timeout=Config.getint('influxdb', 'port') if Config.has_option('influxdb', 'port') else timeout or None,
-            retries=Config.getint('influxdb', 'retries') if Config.has_option('influxdb',
-                                                                              'retries') else retries or None,
-            use_udp=Config.getboolean('influxdb', 'use_udp') if Config.has_option('influxdb',
-                                                                                  'use_udp') else use_udp or None,
-            udp_port=Config.getint('influxdb', 'port') if Config.has_option('influxdb', 'port') else port or None
-        )
+class InfluxPoint(object):
+    def __init__(self, measurement: str, time: datetime.datetime, fields: dict, tags: dict):
+        self.measurement = measurement
+        self.tags = tags
+        self.time = time
+        self.fields = fields
 
-    def generate_data(self, measurement: str, tags: dict, time: datetime.datetime, fields: dict):
-        return {"measurement": measurement, "tags": tags, "time": time, "fields": fields}
+    @property
+    def point(self):
+        return {
+            "measurement": self.measurement,
+            "tags": self.tags,
+            "time": self.time,
+            "fields": self.fields
+        }
 
-    def write_points(self, points: list):
-        return self._influx.write_points(points=points)
+
+class InfluxDB:
+    def __init__(self, host: str = "localhost", port: int = 8086, username: str = "root", password: str = "root",
+                 database: str = None, **kwargs):
+        self._client = InfluxDBClient(host, port, username, password, database, **kwargs)
+        if database is not None and database not in [x['name'] for x in self._client.get_list_database()]:
+            self._client.create_database(database)
+
+    def write_points(self, points: [InfluxPoint, list]):
+        if not isinstance(points, list):
+            points = [points]
+        points = [x.point for x in points]
+        return self._client.write_points(points=points)

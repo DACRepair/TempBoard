@@ -1,27 +1,12 @@
-[app]
-testing = True
-debug = True
-
 [serial]
-port = COM1
+port = COM5
 baud = 115200
+rate = 5
 
-[influxdb]
-host = 127.0.0.1
-port = 8086
-ssl = True
-verify = False
-username = admin
-password = admin
-database = test
-timeout = 300
-retries = 3
-use_udp = False
+[webserver]
+enable = True
+host = 0.0.0.0
+port = 8080
 
-[influxtags]
-region = homelab
-host = temp-monitor
-
-[sensors]
-1234 = Intake
-
+[storage]
+uri = sqlite:///./database.sqlite
